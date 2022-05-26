@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using HtmlAgilityPack;
 
 namespace WindowsFormsApp1
@@ -37,6 +38,33 @@ namespace WindowsFormsApp1
                     var path = @"kutluhanAgility.txt";
                     var doc = new HtmlAgilityPack.HtmlDocument();
                     doc.Load(path);
+                    ////NEW
+                    //XmlDocument doc2 = new XmlDocument();
+                    //doc2.Load(ofd.FileName);
+                    //XmlNodeList compositionLoist = doc2.GetElementsByTagName("ui:composition");
+                    //for (int i = 0; i < compositionLoist.Count; i++)
+                    //{
+                    //    XmlNodeList elemList = doc2.GetElementsByTagName("ui:fragment");
+                    //    for (int x = 0; x < elemList.Count; x++)
+                    //    {
+                    //        XmlNodeList outputLabelList = doc2.GetElementsByTagName("me:outputLabel");
+                    //        for(int z = 0; z < outputLabelList.Count; z++)
+                    //        {
+                    //            Console.WriteLine(elemList[x].Attributes[0].InnerText);
+                    //            Console.WriteLine(outputLabelList[z].Attributes[0].InnerText);
+                    //        }
+                    //        //***** ULASILAMIYOR
+                    //        XmlNodeList inputTextList = doc2.GetElementsByTagName("me:inputText");
+                    //        for (int f = 0; f < inputTextList.Count; f++)
+                    //        {
+
+                    //            Console.WriteLine("INPUT TEXT: " + outputLabelList[f].Attributes[0].InnerText);
+                    //        }
+                    //        //***** ULASILAMIYOR
+                    //    }
+                    //}
+                   
+                    ////END
                     foreach (HtmlAgilityPack.HtmlNode node in
                      doc.DocumentNode.SelectNodes("//div[@class='form-group samerow']"))
                     {
@@ -44,7 +72,6 @@ namespace WindowsFormsApp1
                     }
                     SaveOnExcel(comingDiv);
                 }
-
             }
         }
         //EXCEL ÜZERİNE KAYIT ETME
