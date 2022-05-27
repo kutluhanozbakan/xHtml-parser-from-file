@@ -20,6 +20,8 @@ namespace WindowsFormsApp1
         List<String> valueNames = new List<String> { };
         List<String> nodeNames = new List<String> { };
         List<String> comingDiv = new List<String> { };
+        List<String> attributeInnerHTMLNames = new List<String> { };
+        int attributeLength = 0;
         int x, y, z = 0;
         bool close = false;
         Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
@@ -37,15 +39,7 @@ namespace WindowsFormsApp1
             CreateExcelFile();
         }
 
-        private void CreateExcelFile()
-        {
-            xlWorkBook = xlApp.Workbooks.Add(misValue);
-            xlWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
-            xlWorkSheet.Cells[1, 1] = "Node Name";
-            xlWorkSheet.Cells[1, 2] = "Names";
-            xlWorkSheet.Cells[1, 3] = "Values";
-            xlWorkBook.SaveAs("C:\\Users\\kutluhan.ozbakan\\Documents\\ARD\\csharp-Excel.xls", Microsoft.Office.Interop.Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
-        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog ofd = new OpenFileDialog()
@@ -61,11 +55,12 @@ namespace WindowsFormsApp1
                     var path = ofd.FileName;
                     
                     var doc = new HtmlAgilityPack.HtmlDocument();
-                    doc.Load(path);
+                    doc.Load(path,Encoding.UTF8);
                     List<HtmlNode> nodes = doc.DocumentNode.ChildNodes.ToList();
                     getNodesInformation(nodes);
                     close = true;
-                    SaveOnExcel(attributeNames, valueNames, nodeNames, x, y, z, close);
+
+                    SaveOnExcel(attributeNames, valueNames, nodeNames, attributeInnerHTMLNames, x, y, z, close);
 
                 }
             }
@@ -75,53 +70,88 @@ namespace WindowsFormsApp1
         {
            foreach(var node in nodes)
             {
-               nodeNames.Add(node.Name);
+                if(node.HasChildNodes || node.HasAttributes)
+                {
+                    Console.WriteLine("Node Name:" + node.Name);
+                    nodeNames.Add(node.Name);
+                }          
                if(node.HasAttributes)
                 {
+                    
                     foreach(var attributes in node.Attributes)
                     {
-                        Console.WriteLine("Attribute:" + attributes.Name);
-                        Console.WriteLine("Value:" + attributes.Value);
-                        attributeNames.Add(attributes.Name);
-                        valueNames.Add(attributes.Value);
+                        if(attributes.Name != "class")
+                        {
+                            if(attributes.OwnerNode.InnerText != "" && !attributes.OwnerNode.InnerText.Contains("\r"))
+                            {
+                                attributeInnerHTMLNames.Add(attributes.OwnerNode.InnerText);
+
+                            }
+                            else
+                            {
+                                attributeInnerHTMLNames.Add("");
+                            }
+                            attributeLength = node.Attributes.Count;
+                            Console.WriteLine("Attribute:" + attributes.Name);
+                            Console.WriteLine("Value:" + attributes.Value);
+                            attributeNames.Add(attributes.Name);
+                            valueNames.Add(attributes.Value);
+
+                        }
                     }
-                    SaveOnExcel(attributeNames, valueNames, nodeNames, x, y, z, close);
+                   
+                    Console.WriteLine(attributeLength);
+                    
+                   SaveOnExcel(attributeNames, valueNames, nodeNames, attributeInnerHTMLNames, x, y, z, close);
+                  
                 }
                 if(node.HasChildNodes)
                 {
                     List<HtmlNode> childNode = node.ChildNodes.ToList();
+                  
                     getNodesInformation(childNode);
                 }
+             
             }
-          
+            attributeNames.Add("");
+            valueNames.Add("");
+            attributeInnerHTMLNames.Add("");
         }
-
         //EXCEL ÜZERİNE KAYIT ETME
-        private void SaveOnExcel(List<String> attiributes, List<String> values, List<String> nodeNames, int x, int y, int z, bool close)
-        {   
-   
-            for (int i = 1; i <= nodeNames.Count; i++)
+        private void SaveOnExcel(List<String> attiributes, List<String> values, List<String> nodeNames, List<string> attributeInnerHTMLNames, int x, int y, int z, bool close)
+        {
+            for (int i = 1; i <= attributeInnerHTMLNames.Count; i++)
             {
-                xlWorkSheet.Cells[i + 1, 1] = nodeNames[i - 1];
+                xlWorkSheet.Cells[i + 1, 4] = attributeInnerHTMLNames[i - 1];
             }
             for (int i = 1; i <= attiributes.Count; i++)
             {
-                xlWorkSheet.Cells[i+1, 2] = attiributes[i-1];
+                xlWorkSheet.Cells[i+1, 2] = attiributes[i-1];             
             }
             for (int i = 1; i <= values.Count; i++)
             {
-                xlWorkSheet.Cells[i + 1, 3] = values[i - 1];
+                xlWorkSheet.Cells[i + 1, 3] = values[i - 1];                
             }
             if (close)
             {
                 closeExcel(xlWorkBook, xlWorkSheet, misValue, xlApp);
             }
+            
+            
+           
+        }
+        private void CreateExcelFile()
+        {
+            xlWorkBook = xlApp.Workbooks.Add(misValue);
+            xlWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+            xlWorkSheet.Cells[1, 1] = "Node Name";
+            xlWorkSheet.Cells[1, 2] = "Names";
+            xlWorkSheet.Cells[1, 3] = "Values";
+            xlWorkBook.SaveAs("C:\\Users\\kutluhan.ozbakan\\Documents\\ARD\\csharp-Excel.xls", Microsoft.Office.Interop.Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
         }
         private void closeExcel(Microsoft.Office.Interop.Excel.Workbook xlWorkBook, Microsoft.Office.Interop.Excel.Worksheet xlWorkSheet, object misValue, Microsoft.Office.Interop.Excel.Application xlApp)
         {
             //EXCEL DOSYASININ YAZILACAGI YERİ ŞİMDİLİK ELLE VERİYORUM.
-
-
             xlWorkBook.Close(true, misValue, misValue);
             xlApp.Quit();
             Marshal.ReleaseComObject(xlWorkSheet);
