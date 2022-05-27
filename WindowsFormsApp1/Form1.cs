@@ -16,6 +16,9 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        List<String> attributeNames = new List<String> { };
+        List<String> valueNames = new List<String> { };
+        List<String> nodeNames = new List<String> { };
         List<String> comingDiv = new List<String> { };
         public Form1()
         {
@@ -35,47 +38,44 @@ namespace WindowsFormsApp1
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     SaveFile(ofd);
-                    var path = @"kutluhanAgility.txt";
+                    var path = ofd.FileName;
+                    
                     var doc = new HtmlAgilityPack.HtmlDocument();
                     doc.Load(path);
-                    ////NEW
-                    //XmlDocument doc2 = new XmlDocument();
-                    //doc2.Load(ofd.FileName);
-                    //XmlNodeList compositionLoist = doc2.GetElementsByTagName("ui:composition");
-                    //for (int i = 0; i < compositionLoist.Count; i++)
-                    //{
-                    //    XmlNodeList elemList = doc2.GetElementsByTagName("ui:fragment");
-                    //    for (int x = 0; x < elemList.Count; x++)
-                    //    {
-                    //        XmlNodeList outputLabelList = doc2.GetElementsByTagName("me:outputLabel");
-                    //        for(int z = 0; z < outputLabelList.Count; z++)
-                    //        {
-                    //            Console.WriteLine(elemList[x].Attributes[0].InnerText);
-                    //            Console.WriteLine(outputLabelList[z].Attributes[0].InnerText);
-                    //        }
-                    //        //***** ULASILAMIYOR
-                    //        XmlNodeList inputTextList = doc2.GetElementsByTagName("me:inputText");
-                    //        for (int f = 0; f < inputTextList.Count; f++)
-                    //        {
+                    List<HtmlNode> nodes = doc.DocumentNode.ChildNodes.ToList();
+                    getNodesInformation(nodes);
+                    SaveOnExcel(attributeNames,valueNames,nodeNames);
 
-                    //            Console.WriteLine("INPUT TEXT: " + outputLabelList[f].Attributes[0].InnerText);
-                    //        }
-                    //        //***** ULASILAMIYOR
-                    //    }
-                    //}
-                   
-                    ////END
-                    foreach (HtmlAgilityPack.HtmlNode node in
-                     doc.DocumentNode.SelectNodes("//div[@class='form-group samerow']"))
-                    {
-                        comingDiv.Insert(0, node.InnerHtml);
-                    }
-                    SaveOnExcel(comingDiv);
                 }
             }
         }
+
+        private void getNodesInformation(List<HtmlNode> nodes)
+        {
+           foreach(var node in nodes)
+            {
+                nodeNames.Add(node.Name);
+               if(node.HasAttributes)
+                {
+                    foreach(var attributes in node.Attributes)
+                    {
+                        Console.WriteLine("Attribute:" + attributes.Name);
+                        Console.WriteLine("Value:" + attributes.Value);
+                        attributeNames.Add(attributes.Name);
+                        valueNames.Add(attributes.Value);
+                    }
+                }
+                if(node.HasChildNodes)
+                {
+                    List<HtmlNode> childNode = node.ChildNodes.ToList();
+                    getNodesInformation(childNode);
+                }
+            }
+          
+        }
+
         //EXCEL ÜZERİNE KAYIT ETME
-        private void SaveOnExcel(List<String> data)
+        private void SaveOnExcel(List<String> attiributes, List<String> values, List<String> nodeNames)
         {   
             Microsoft.Office.Interop.Excel.Application xlApp = new Microsoft.Office.Interop.Excel.Application();
             if (xlApp == null)
@@ -88,12 +88,22 @@ namespace WindowsFormsApp1
             object misValue = System.Reflection.Missing.Value;
             xlWorkBook = xlApp.Workbooks.Add(misValue);
             xlWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
-            xlWorkSheet.Cells[1, 1] = "Div";
-
-            for (int i = 1; i <= data.Count; i++)
+            xlWorkSheet.Cells[1, 1] = "Node Name";
+            xlWorkSheet.Cells[1, 2] = "Names";
+            xlWorkSheet.Cells[1, 3] = "Values";
+            for (int i = 1; i <= nodeNames.Count; i++)
             {
-                xlWorkSheet.Cells[i+1, 1] = data[i-1];
+                xlWorkSheet.Cells[i + 1, 1] = nodeNames[i - 1];
             }
+            for (int i = 1; i <= attiributes.Count; i++)
+            {
+                xlWorkSheet.Cells[i+1, 2] = attiributes[i-1];
+            }
+            for (int i = 1; i <= values.Count; i++)
+            {
+                xlWorkSheet.Cells[i + 1, 3] = values[i - 1];
+            }
+            
             //EXCEL DOSYASININ YAZILACAGI YERİ ŞİMDİLİK ELLE VERİYORUM.
             xlWorkBook.SaveAs("C:\\Users\\kutluhan.ozbakan\\Documents\\ARD\\csharp-Excel.xls", Microsoft.Office.Interop.Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue, misValue, misValue, misValue);
             xlWorkBook.Close(true, misValue, misValue);
@@ -122,6 +132,16 @@ namespace WindowsFormsApp1
             var htmlDoc = new HtmlAgilityPack.HtmlDocument();
             htmlDoc.LoadHtml(codeFromEditedFile);
             htmlDoc.Save("kutluhanAgility.txt");
-        }      
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 }

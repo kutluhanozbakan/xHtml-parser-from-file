@@ -34,12 +34,12 @@ namespace WindowsFormsApp1
             // 
             // txtFileName
             // 
-            this.txtFileName.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.txtFileName.Location = new System.Drawing.Point(25, 12);
+            this.txtFileName.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.txtFileName.Location = new System.Drawing.Point(34, 46);
             this.txtFileName.Name = "txtFileName";
-            this.txtFileName.Size = new System.Drawing.Size(446, 94);
+            this.txtFileName.Size = new System.Drawing.Size(819, 55);
             this.txtFileName.TabIndex = 1;
-            this.txtFileName.Text = "CLICK";
+            this.txtFileName.Text = "EXCEL OLUŞTUR";
             this.txtFileName.UseVisualStyleBackColor = false;
             this.txtFileName.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -47,10 +47,11 @@ namespace WindowsFormsApp1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(503, 133);
+            this.ClientSize = new System.Drawing.Size(889, 150);
             this.Controls.Add(this.txtFileName);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }
