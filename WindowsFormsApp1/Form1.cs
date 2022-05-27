@@ -70,17 +70,23 @@ namespace WindowsFormsApp1
         {
            foreach(var node in nodes)
             {
+
                 if(node.HasChildNodes || node.HasAttributes)
                 {
-                    Console.WriteLine("Node Name:" + node.Name);
-                    nodeNames.Add(node.Name);
+                    if(node.Name != "div" && node.Name != "ui:composition")
+                    {
+                        Console.WriteLine("Node Name:" + node.Name);
+                        nodeNames.Add(node.Name);
+                    }
+
+                   
                 }          
                if(node.HasAttributes)
                 {
                     
                     foreach(var attributes in node.Attributes)
                     {
-                        if(attributes.Name != "class")
+                        if(attributes.Name != "class" && node.Name != "ui:composition")
                         {
                             if(attributes.OwnerNode.InnerText != "" && !attributes.OwnerNode.InnerText.Contains("\r"))
                             {
@@ -94,6 +100,7 @@ namespace WindowsFormsApp1
                             attributeLength = node.Attributes.Count;
                             Console.WriteLine("Attribute:" + attributes.Name);
                             Console.WriteLine("Value:" + attributes.Value);
+                            nodeNames.Add("");
                             attributeNames.Add(attributes.Name);
                             valueNames.Add(attributes.Value);
 
@@ -113,6 +120,7 @@ namespace WindowsFormsApp1
                 }
              
             }
+            nodeNames.Add("");
             attributeNames.Add("");
             valueNames.Add("");
             attributeInnerHTMLNames.Add("");
@@ -120,6 +128,10 @@ namespace WindowsFormsApp1
         //EXCEL ÜZERİNE KAYIT ETME
         private void SaveOnExcel(List<String> attiributes, List<String> values, List<String> nodeNames, List<string> attributeInnerHTMLNames, int x, int y, int z, bool close)
         {
+            for (int i = 1; i <= nodeNames.Count; i++)
+            {
+                xlWorkSheet.Cells[i + 1, 1] = nodeNames[i - 1];
+            }
             for (int i = 1; i <= attributeInnerHTMLNames.Count; i++)
             {
                 xlWorkSheet.Cells[i + 1, 4] = attributeInnerHTMLNames[i - 1];
